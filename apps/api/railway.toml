@@ -1,14 +1,2 @@
-# Railway 서비스 설정
-# Service Settings에서 Root Directory를 'apps/api'로 지정
-
 [build]
-builder = "NIXPACKS"
-# nixpacks.toml이 빌드·기동 명령을 처리
-
-[deploy]
-# Prisma migrate deploy로 스키마 동기화 후 서버 기동
-startCommand = "pnpm prisma migrate deploy && node dist/main.js"
-healthcheckPath = "/health"
-healthcheckTimeout = 60
-restartPolicyType = "ON_FAILURE"
-restartPolicyMaxRetries = 5
+dockerfilePath = "Dockerfile"
