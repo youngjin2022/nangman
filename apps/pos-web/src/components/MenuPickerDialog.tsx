@@ -108,18 +108,18 @@ export function MenuPickerDialog({ open, tableId, onClose }: MenuPickerDialogPro
     <div className="fixed inset-0 z-40 flex justify-end animate-fade-in">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
-      {/* 우측 패널 */}
-      <div className="relative w-full max-w-[800px] h-full bg-bg-panel shadow-2xl flex flex-col animate-slide-in-right">
+      {/* 우측 패널 - 모바일은 풀폭, 데스크톱은 우측 슬라이드 */}
+      <div className="relative w-full lg:max-w-[800px] h-full bg-bg-panel shadow-2xl flex flex-col lg:animate-slide-in-right">
         {/* 헤더 */}
-        <div className="h-14 px-5 flex items-center justify-between border-b border-line">
+        <div className="h-14 px-4 lg:px-5 flex items-center justify-between border-b border-line shrink-0">
           <h2 className="text-base font-bold">추가 주문 입력</h2>
-          <button onClick={onClose} className="w-9 h-9 rounded-lg hover:bg-bg-subtle">✕</button>
+          <button onClick={onClose} className="w-11 h-11 lg:w-9 lg:h-9 rounded-lg hover:bg-bg-subtle active:scale-95">✕</button>
         </div>
 
-        {/* 본문: 좌(메뉴 선택) + 우(임시 카트) */}
-        <div className="flex-1 flex min-h-0">
-          {/* 메뉴 영역 */}
-          <div className="flex-1 flex flex-col min-w-0 border-r border-line">
+        {/* 본문: 데스크톱 좌우(메뉴+카트) / 모바일 상하(메뉴 위 + 카트 풋바) */}
+        <div className="flex-1 flex flex-col lg:flex-row min-h-0">
+          {/* 메뉴 영역 - 모바일에서는 풀폭, 데스크톱에서는 우측 카트와 분할 */}
+          <div className="flex-1 flex flex-col min-w-0 lg:border-r border-line">
             {/* 카테고리 탭 */}
             <div className="flex gap-1 px-3 py-2 border-b border-line overflow-x-auto scrollbar-none">
               {categories.map((c) => (
@@ -127,7 +127,7 @@ export function MenuPickerDialog({ open, tableId, onClose }: MenuPickerDialogPro
                   key={c.id}
                   onClick={() => setActiveCat(c.id)}
                   className={cn(
-                    'shrink-0 px-3 h-9 rounded-lg text-sm font-medium',
+                    'shrink-0 px-3 h-11 lg:h-9 rounded-lg text-sm font-medium active:scale-95',
                     activeCat === c.id ? 'bg-accent text-white' : 'bg-bg-subtle hover:bg-line',
                   )}
                 >
@@ -136,17 +136,18 @@ export function MenuPickerDialog({ open, tableId, onClose }: MenuPickerDialogPro
               ))}
             </div>
 
-            {/* 메뉴 그리드 */}
+            {/* 메뉴 그리드 - 모바일 2열, 태블릿 3열, 데스크톱 3열 */}
             <div className="flex-1 overflow-y-auto scrollbar-thin p-3">
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {filtered.map((m) => (
                   <button
                     key={m.id}
+                    type="button"
                     onClick={() => handleMenuClick(m)}
                     disabled={m.isSoldOut}
                     className={cn(
                       'relative p-3 rounded-xl border text-left transition',
-                      'h-20 flex flex-col justify-between',
+                      'min-h-[5.25rem] flex flex-col justify-between',
                       m.isSoldOut
                         ? 'bg-bg-subtle border-line opacity-50 cursor-not-allowed'
                         : 'bg-bg-panel border-line hover:border-accent active:scale-95',
@@ -165,18 +166,18 @@ export function MenuPickerDialog({ open, tableId, onClose }: MenuPickerDialogPro
             </div>
           </div>
 
-          {/* 임시 카트 */}
-          <div className="w-80 flex flex-col bg-bg-subtle">
+          {/* 임시 카트 - 모바일에서는 하단 고정 풋바(높이 제한), 데스크톱은 우측 320px 풀높이 */}
+          <div className="lg:w-80 flex flex-col bg-bg-subtle border-t lg:border-t-0 border-line max-h-[45vh] lg:max-h-none">
             <div className="px-4 py-3 border-b border-line">
               <div className="text-xs text-ink-muted">담을 항목</div>
               <div className="text-base font-bold tabular-nums">
                 {draft.reduce((s, d) => s + d.quantity, 0)}개 · {formatKRW(draftTotal)}
               </div>
             </div>
-            <div className="flex-1 overflow-y-auto scrollbar-thin p-3 space-y-2">
+            <div className="flex-1 overflow-y-auto scrollbar-thin p-3 space-y-2 min-h-0">
               {draft.length === 0 ? (
-                <div className="text-center text-ink-muted text-sm py-10">
-                  좌측 메뉴를 클릭해 추가하세요
+                <div className="text-center text-ink-muted text-sm py-6 lg:py-10">
+                  메뉴를 클릭해 추가하세요
                 </div>
               ) : (
                 draft.map((d) => (
@@ -189,23 +190,31 @@ export function MenuPickerDialog({ open, tableId, onClose }: MenuPickerDialogPro
                         )}
                       </div>
                       <button
+                        type="button"
                         onClick={() => updateQty(d.lineId, 0)}
-                        className="text-ink-muted hover:text-red-600 text-sm"
+                        className="w-11 h-11 lg:w-9 lg:h-9 shrink-0 flex items-center justify-center rounded-lg text-ink-muted active:bg-bg-subtle active:text-red-600 text-lg leading-none"
+                        aria-label="항목 삭제"
                       >
                         ✕
                       </button>
                     </div>
                     <div className="mt-2 flex items-center justify-between">
-                      <div className="inline-flex items-center bg-bg-subtle rounded-lg">
+                      <div className="inline-flex items-center bg-bg-subtle rounded-lg overflow-hidden">
                         <button
+                          type="button"
                           onClick={() => updateQty(d.lineId, d.quantity - 1)}
-                          className="w-8 h-8 hover:bg-line rounded-l-lg"
-                        >−</button>
-                        <span className="w-8 text-center text-sm font-medium tabular-nums">{d.quantity}</span>
+                          className="w-11 h-11 lg:w-8 lg:h-8 flex items-center justify-center shrink-0 active:bg-line"
+                        >
+                          −
+                        </button>
+                        <span className="min-w-[2.75rem] text-center text-sm font-medium tabular-nums">{d.quantity}</span>
                         <button
+                          type="button"
                           onClick={() => updateQty(d.lineId, d.quantity + 1)}
-                          className="w-8 h-8 hover:bg-line rounded-r-lg"
-                        >+</button>
+                          className="w-11 h-11 lg:w-8 lg:h-8 flex items-center justify-center shrink-0 active:bg-line"
+                        >
+                          +
+                        </button>
                       </div>
                       <span className="text-sm font-semibold tabular-nums">
                         {formatKRW(d.unitPrice * d.quantity)}
@@ -215,11 +224,12 @@ export function MenuPickerDialog({ open, tableId, onClose }: MenuPickerDialogPro
                 ))
               )}
             </div>
-            <div className="p-3 border-t border-line">
+            <div className="safe-bottom p-3 border-t border-line">
               <button
+                type="button"
                 disabled={draft.length === 0 || submitting}
                 onClick={handleSubmit}
-                className="w-full h-12 rounded-xl bg-accent text-white font-semibold disabled:opacity-50 hover:bg-accent-dark"
+                className="w-full h-12 rounded-xl bg-accent text-white font-semibold disabled:opacity-50 hover:bg-accent-dark active:scale-[0.99]"
               >
                 {submitting ? '추가 중…' : `${formatKRW(draftTotal)} 주문 추가`}
               </button>
@@ -317,9 +327,10 @@ function OptionSheet({
                   return (
                     <button
                       key={it.id}
+                      type="button"
                       onClick={() => toggle(g, it.id)}
                       className={cn(
-                        'p-3 rounded-lg border text-left text-sm',
+                        'min-h-11 p-3 rounded-lg border text-left text-sm active:scale-[0.99]',
                         checked ? 'border-accent bg-accent/10' : 'border-line bg-bg-subtle',
                       )}
                     >
@@ -334,9 +345,12 @@ function OptionSheet({
             </div>
           ))}
         </div>
-        <div className="p-4 border-t border-line grid grid-cols-2 gap-2">
-          <button onClick={onClose} className="h-12 rounded-xl bg-bg-subtle font-medium">취소</button>
+        <div className="safe-bottom p-4 border-t border-line grid grid-cols-2 gap-2">
+          <button type="button" onClick={onClose} className="h-12 rounded-xl bg-bg-subtle font-medium active:scale-[0.99]">
+            취소
+          </button>
           <button
+            type="button"
             disabled={!valid}
             onClick={() =>
               onAdd({
@@ -348,7 +362,7 @@ function OptionSheet({
                 optionItemIds: optionIds,
               })
             }
-            className="h-12 rounded-xl bg-accent text-white font-semibold disabled:opacity-50"
+            className="h-12 rounded-xl bg-accent text-white font-semibold disabled:opacity-50 active:scale-[0.99]"
           >
             {formatKRW(unitPrice)} 추가
           </button>

@@ -25,7 +25,7 @@ export function ToastHost() {
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed top-16 right-4 z-50 space-y-2 w-80 pointer-events-none">
+    <div className="fixed top-16 left-3 right-3 z-50 space-y-2 w-auto max-w-md mx-auto sm:left-auto sm:right-4 sm:mx-0 sm:w-80 pointer-events-none">
       {toasts.map((t) => (
         <button
           key={t.id}

@@ -1,4 +1,4 @@
-// POS 메인 화면 - 좌측 테이블 그리드 + 우측 주문 패널
+// POS 메인 화면 - 데스크톱: 좌측 사이드바 + 우측 패널 / 모바일: 테이블 그리드 → 선택 시 OrderPanel 풀스크린
 import { useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { TableGrid } from '@/components/TableGrid';
@@ -7,19 +7,19 @@ import { ToastHost } from '@/components/ToastHost';
 import { useTablesStore } from '@/lib/store/tablesStore';
 import { useNotificationStore } from '@/lib/store/notificationStore';
 import { subscribeRealtime } from '@/lib/socket';
+import { cn } from '@/lib/utils';
 
 export default function App() {
   const loadInitial = useTablesStore((s) => s.loadInitial);
   const refreshTables = useTablesStore((s) => s.refreshTables);
   const refreshSelected = useTablesStore((s) => s.refreshSelected);
+  const selectedTableId = useTablesStore((s) => s.selectedTableId);
   const pushToast = useNotificationStore((s) => s.push);
 
-  // 초기 로드
   useEffect(() => {
     loadInitial();
   }, [loadInitial]);
 
-  // 실시간 구독 - 신규 주문 알림 + 테이블 갱신
   useEffect(() => {
     const unsub = subscribeRealtime((e) => {
       if (e.type === 'order.created') {
@@ -31,7 +31,6 @@ export default function App() {
         });
         refreshTables();
         refreshSelected();
-        // (옵션) 알림음 재생: new Audio('/notify.mp3').play().catch(() => {});
       }
     });
     return unsub;
@@ -41,12 +40,28 @@ export default function App() {
     <div className="h-full flex flex-col">
       <Header />
 
-      {/* 메인 2분할 - 좌측 320px, 우측 가변 */}
-      <div className="flex-1 flex min-h-0">
-        <aside className="w-[320px] shrink-0 border-r border-line bg-bg-panel">
+      <div className="flex-1 flex min-h-0 relative">
+        {/* 사이드바(테이블 그리드) - 모바일은 풀폭, 데스크톱은 320px 고정 */}
+        <aside
+          className={cn(
+            'w-full lg:w-[320px] lg:shrink-0 lg:border-r border-line bg-bg-panel',
+            // 모바일: OrderPanel 오버레이 떴을 때는 사이드바 숨김 (배경 스크롤 방지)
+            selectedTableId && 'hidden lg:block',
+          )}
+        >
           <TableGrid />
         </aside>
-        <main className="flex-1 min-w-0">
+
+        {/* 주문 패널 - 데스크톱: 우측 영역 / 모바일: 풀스크린 오버레이 */}
+        <main
+          className={cn(
+            'flex-1 min-w-0 bg-bg',
+            // 모바일: 테이블 미선택 시 숨김, 선택 시 풀스크린 오버레이
+            !selectedTableId && 'hidden lg:block',
+            selectedTableId &&
+              'fixed inset-0 top-14 z-30 lg:relative lg:inset-auto lg:top-auto lg:z-auto',
+          )}
+        >
           <OrderPanel />
         </main>
       </div>

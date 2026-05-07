@@ -18,6 +18,10 @@
 }
 
 @layer utilities {
+  /* iOS 노치 홈 인디케이터 대비 — PaymentDialog 등 하단 버튼 영역 */
+  .safe-bottom {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+  }
   .scrollbar-thin::-webkit-scrollbar {
     width: 8px;
     height: 8px;

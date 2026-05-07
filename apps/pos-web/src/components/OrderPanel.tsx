@@ -45,7 +45,7 @@ export function OrderPanel() {
       <div className="h-full flex items-center justify-center text-ink-muted">
         <div className="text-center">
           <div className="text-5xl mb-2">📋</div>
-          <p className="text-sm">좌측에서 테이블을 선택하세요</p>
+          <p className="text-sm">목록에서 테이블을 선택하세요</p>
         </div>
       </div>
     );
@@ -67,53 +67,67 @@ export function OrderPanel() {
   return (
     <div className="h-full flex flex-col bg-bg">
       {/* 상단: 테이블 정보 + 액션 버튼 */}
-      <div className="px-6 py-4 bg-bg-panel border-b border-line">
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="flex items-center gap-3">
-              <h2 className="text-2xl font-bold">{table.tableName}</h2>
-              <span
-                className={cn(
-                  'px-2.5 py-1 rounded-md text-xs font-semibold',
-                  isAvailable ? 'bg-bg-subtle text-ink-muted' : 'bg-status-occupied/15 text-status-occupied',
-                )}
-              >
-                {isAvailable ? '비어있음' : '사용중'}
-              </span>
+      <div className="px-4 lg:px-6 py-3 lg:py-4 bg-bg-panel border-b border-line">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-start gap-2 min-w-0">
+            {/* 모바일 뒤로가기 버튼 (테이블 그리드로 복귀) */}
+            <button
+              onClick={() => useTablesStore.getState().selectTable(null)}
+              className="lg:hidden -ml-1 mt-0.5 w-11 h-11 shrink-0 flex items-center justify-center rounded-lg hover:bg-bg-subtle active:scale-95"
+              aria-label="뒤로"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 lg:gap-3 flex-wrap">
+                <h2 className="text-xl lg:text-2xl font-bold truncate">{table.tableName}</h2>
+                <span
+                  className={cn(
+                    'px-2 lg:px-2.5 py-0.5 lg:py-1 rounded-md text-[11px] lg:text-xs font-semibold',
+                    isAvailable ? 'bg-bg-subtle text-ink-muted' : 'bg-status-occupied/15 text-status-occupied',
+                  )}
+                >
+                  {isAvailable ? '비어있음' : '사용중'}
+                </span>
+              </div>
+              {!isAvailable && table.occupiedSince && (
+                <p className="text-xs lg:text-sm text-ink-muted mt-0.5 lg:mt-1">
+                  점유 {formatTime(table.occupiedSince)} · 경과 {formatElapsed(table.occupiedSince)}
+                </p>
+              )}
             </div>
-            {!isAvailable && table.occupiedSince && (
-              <p className="text-sm text-ink-muted mt-1">
-                점유시각 {formatTime(table.occupiedSince)} · 경과 {formatElapsed(table.occupiedSince)}
-              </p>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setShowAdd(true)}
-              disabled={isAvailable}
-              className="h-11 px-4 rounded-xl bg-accent text-white font-medium hover:bg-accent-dark disabled:opacity-50"
-            >
-              + 추가 주문
-            </button>
-            <button
-              onClick={() => setShowPay(true)}
-              disabled={unpaidIds.length === 0}
-              className="h-11 px-4 rounded-xl bg-status-occupied text-white font-medium hover:opacity-90 disabled:opacity-50"
-            >
-              결제하기
-            </button>
-            <button
-              onClick={() => setConfirmClear(true)}
-              disabled={isAvailable}
-              className="h-11 px-4 rounded-xl bg-bg-subtle text-ink font-medium hover:bg-line disabled:opacity-50"
-            >
-              퇴석 처리
-            </button>
           </div>
         </div>
 
+        {/* 액션 버튼 - 모바일에서는 풀폭 3등분 그리드 */}
+        <div className="mt-3 grid grid-cols-3 gap-2 lg:flex lg:justify-end">
+          <button
+            onClick={() => setShowAdd(true)}
+            disabled={isAvailable}
+            className="h-11 px-2 lg:px-4 rounded-xl bg-accent text-white text-sm font-medium hover:bg-accent-dark active:scale-95 disabled:opacity-50"
+          >
+            + 추가
+          </button>
+          <button
+            onClick={() => setShowPay(true)}
+            disabled={unpaidIds.length === 0}
+            className="h-11 px-2 lg:px-4 rounded-xl bg-status-occupied text-white text-sm font-medium hover:opacity-90 active:scale-95 disabled:opacity-50"
+          >
+            결제하기
+          </button>
+          <button
+            onClick={() => setConfirmClear(true)}
+            disabled={isAvailable}
+            className="h-11 px-2 lg:px-4 rounded-xl bg-bg-subtle text-ink text-sm font-medium hover:bg-line active:scale-95 disabled:opacity-50"
+          >
+            퇴석 처리
+          </button>
+        </div>
+
         {/* 합계 요약 */}
-        <div className="mt-4 grid grid-cols-3 gap-3">
+        <div className="mt-3 lg:mt-4 grid grid-cols-3 gap-2 lg:gap-3">
           <SummaryStat label="주문 건수" value={`${orders.length}건`} />
           <SummaryStat label="총 항목" value={`${table.totalItemCount}개`} />
           <SummaryStat
@@ -125,7 +139,7 @@ export function OrderPanel() {
       </div>
 
       {/* 주문 리스트 */}
-      <div className="flex-1 overflow-y-auto scrollbar-thin px-6 py-4 space-y-3">
+      <div className="flex-1 overflow-y-auto scrollbar-thin px-4 lg:px-6 py-3 lg:py-4 space-y-2 lg:space-y-3">
         {orders.length === 0 ? (
           <div className="h-full flex items-center justify-center text-ink-muted text-sm">
             주문 내역이 없습니다
@@ -204,11 +218,11 @@ function SummaryStat({
   highlight?: boolean;
 }) {
   return (
-    <div className={cn('p-3 rounded-xl', highlight ? 'bg-accent/10' : 'bg-bg-subtle')}>
-      <div className="text-[11px] text-ink-muted">{label}</div>
+    <div className={cn('p-2 lg:p-3 rounded-xl min-w-0', highlight ? 'bg-accent/10' : 'bg-bg-subtle')}>
+      <div className="text-[10px] lg:text-[11px] text-ink-muted">{label}</div>
       <div
         className={cn(
-          'text-base font-bold mt-0.5 tabular-nums',
+          'text-sm lg:text-base font-bold mt-0.5 tabular-nums truncate',
           highlight && 'text-accent',
         )}
       >
@@ -234,14 +248,15 @@ function OrderCard({
   return (
     <div
       className={cn(
-        'bg-bg-panel rounded-2xl border p-4',
+        'bg-bg-panel rounded-2xl border p-3 lg:p-4',
         isPending ? 'border-status-pending shadow-md' : 'border-line',
       )}
     >
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
+      {/* 모바일에서는 메타 정보와 액션을 세로로 분리해 좁은 화면에서도 줄넘김 안 되게 */}
+      <div className="flex items-start justify-between gap-2 flex-wrap">
+        <div className="flex items-center gap-1.5 lg:gap-2 flex-wrap min-w-0">
           <span className={cn('text-[11px] px-2 py-0.5 rounded font-semibold', klass)}>{text}</span>
-          <span className="text-sm font-semibold tabular-nums">#{order.orderNumber}</span>
+          <span className="text-xs lg:text-sm font-semibold tabular-nums">#{order.orderNumber}</span>
           <span
             className={cn(
               'text-[10px] px-1.5 py-0.5 rounded',
@@ -250,13 +265,13 @@ function OrderCard({
           >
             {order.orderType === 'CUSTOMER' ? '손님' : '직원'}
           </span>
-          <span className="text-xs text-ink-muted">{formatTime(order.requestedAt)}</span>
+          <span className="text-[11px] lg:text-xs text-ink-muted">{formatTime(order.requestedAt)}</span>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0">
           {isPending && (
             <button
               onClick={onConfirm}
-              className="h-8 px-3 rounded-lg bg-accent text-white text-xs font-semibold hover:bg-accent-dark"
+              className="h-11 lg:h-8 min-w-[44px] px-3 rounded-lg bg-accent text-white text-xs font-semibold hover:bg-accent-dark active:scale-95"
             >
               확인
             </button>
@@ -264,7 +279,7 @@ function OrderCard({
           {cancellable && (
             <button
               onClick={onCancel}
-              className="h-8 px-3 rounded-lg border border-line text-xs font-medium hover:bg-bg-subtle"
+              className="h-11 lg:h-8 min-w-[44px] px-3 rounded-lg border border-line text-xs font-medium hover:bg-bg-subtle active:scale-95"
             >
               취소
             </button>

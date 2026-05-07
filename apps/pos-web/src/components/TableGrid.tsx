@@ -1,4 +1,5 @@
-// 테이블 그리드 - 좌측 사이드바
+// 테이블 그리드
+// 모바일·태블릿(~1023): 2열 / 데스크톱 사이드바(1024~): 좁은 폭이라 3열
 import { useTablesStore } from '@/lib/store/tablesStore';
 import { TableCard } from './TableCard';
 
@@ -8,9 +9,9 @@ export function TableGrid() {
   const select = useTablesStore((s) => s.selectTable);
 
   return (
-    <div className="h-full overflow-y-auto scrollbar-thin p-4">
-      <div className="text-xs font-semibold text-ink-muted mb-3 px-1">테이블 현황</div>
-      <div className="grid grid-cols-2 gap-3">
+    <div className="h-full overflow-y-auto scrollbar-thin p-3 lg:p-4">
+      <div className="text-xs font-semibold text-ink-muted mb-2 lg:mb-3 px-1">테이블 현황</div>
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 lg:gap-3">
         {tables.map((t) => (
           <TableCard
             key={t.tableId}

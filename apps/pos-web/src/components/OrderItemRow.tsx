@@ -26,7 +26,7 @@ export function OrderItemRow({ item }: OrderItemRowProps) {
           <span className="text-sm text-ink-muted tabular-nums">× {item.quantity}</span>
         </div>
         {item.options.length > 0 && (
-          <p className="text-xs text-ink-muted mt-0.5 ml-[3.25rem]">{item.options.join(' · ')}</p>
+          <p className="text-xs text-ink-muted mt-0.5">{item.options.join(' · ')}</p>
         )}
       </div>
       <span className="text-sm font-medium tabular-nums shrink-0">
