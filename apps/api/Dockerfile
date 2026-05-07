@@ -8,13 +8,14 @@ COPY package.json ./
 COPY prisma/ ./prisma/
 COPY src/ ./src/
 COPY tsconfig.json ./
+COPY tsconfig.prod.json ./
 COPY strip-workspace.js ./
 
 RUN node strip-workspace.js
 
 RUN pnpm install --no-frozen-lockfile
 
-RUN pnpm prisma generate && pnpm tsc -p tsconfig.json
+RUN pnpm prisma generate && pnpm tsc -p tsconfig.prod.json
 
 EXPOSE 4000
 
