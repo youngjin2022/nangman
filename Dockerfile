@@ -1,15 +1,10 @@
 FROM node:20-alpine
 
-RUN npm install -g pnpm
+RUN corepack enable && corepack prepare pnpm@9.6.0 --activate
 
 WORKDIR /app
 
-COPY pnpm-workspace.yaml ./
-COPY pnpm-lock.yaml ./
-COPY package.json ./
-COPY turbo.json ./
-COPY packages/ ./packages/
-COPY apps/api/ ./apps/api/
+COPY . .
 
 RUN pnpm install --frozen-lockfile
 
