@@ -1,5 +1,8 @@
 FROM node:20-alpine
 
+# OpenSSL 설치 (Prisma 필수)
+RUN apk add --no-cache openssl
+
 RUN corepack enable && corepack prepare pnpm@9.6.0 --activate
 
 WORKDIR /app
