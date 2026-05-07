@@ -1,8 +1,8 @@
 [phases.setup]
-nixPkgs = ['nodejs_20', 'openssl']
+nixPkgs = ['nodejs_20', 'nodePackages.pnpm', 'openssl']
 
 [phases.install]
-cmds = ['corepack enable && corepack prepare pnpm@9.6.0 --activate && pnpm install --frozen-lockfile']
+cmds = ['pnpm install --frozen-lockfile']
 
 [phases.build]
 cmds = ['pnpm prisma generate && pnpm tsc -p tsconfig.json']
