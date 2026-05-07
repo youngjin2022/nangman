@@ -1,32 +1,43 @@
 // 메뉴 추가/수정 모달
-import { useEffect, useState } from 'react';
-import { Modal } from '@/components/Modal';
-import { FormField, inputClass, selectClass, textareaClass } from '@/components/FormField';
-import type { Category, Menu } from '@/lib/types';
+import { useEffect, useState } from "react";
+import { Modal } from "@/components/Modal";
+import {
+  FormField,
+  inputClass,
+  selectClass,
+  textareaClass,
+} from "@/components/FormField";
+import type { Category, Menu } from "@/lib/types";
 
 interface MenuFormModalProps {
   open: boolean;
   initial: Menu | null; // null이면 신규
   categories: Category[];
   onClose: () => void;
-  onSubmit: (data: Omit<Menu, 'id'>) => Promise<void>;
+  onSubmit: (data: Omit<Menu, "id">) => Promise<void>;
 }
 
-export function MenuFormModal({ open, initial, categories, onClose, onSubmit }: MenuFormModalProps) {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+export function MenuFormModal({
+  open,
+  initial,
+  categories,
+  onClose,
+  onSubmit,
+}: MenuFormModalProps) {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [price, setPrice] = useState<number>(0);
-  const [categoryId, setCategoryId] = useState('');
+  const [categoryId, setCategoryId] = useState("");
   const [isSoldOut, setIsSoldOut] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
-    setName(initial?.name ?? '');
-    setDescription(initial?.description ?? '');
+    setName(initial?.name ?? "");
+    setDescription(initial?.description ?? "");
     setPrice(initial?.price ?? 0);
-    setCategoryId(initial?.categoryId ?? categories[0]?.id ?? '');
+    setCategoryId(initial?.categoryId ?? categories[0]?.id ?? "");
     setIsSoldOut(initial?.isSoldOut ?? false);
     setError(null);
   }, [open, initial, categories]);
@@ -34,9 +45,9 @@ export function MenuFormModal({ open, initial, categories, onClose, onSubmit }: 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!name.trim()) return setError('메뉴명을 입력해 주세요');
-    if (!categoryId) return setError('카테고리를 선택해 주세요');
-    if (price < 0) return setError('가격은 0원 이상이어야 합니다');
+    if (!name.trim()) return setError("메뉴명을 입력해 주세요");
+    if (!categoryId) return setError("카테고리를 선택해 주세요");
+    if (price < 0) return setError("가격은 0원 이상이어야 합니다");
     setSubmitting(true);
     try {
       await onSubmit({
@@ -50,7 +61,7 @@ export function MenuFormModal({ open, initial, categories, onClose, onSubmit }: 
       });
       onClose();
     } catch (e: any) {
-      setError(e?.message ?? '저장 실패');
+      setError(e?.message ?? "저장 실패");
     } finally {
       setSubmitting(false);
     }
@@ -59,7 +70,7 @@ export function MenuFormModal({ open, initial, categories, onClose, onSubmit }: 
   return (
     <Modal
       open={open}
-      title={initial ? '메뉴 수정' : '메뉴 추가'}
+      title={initial ? "메뉴 수정" : "메뉴 추가"}
       onClose={onClose}
       width="md"
       footer={
@@ -68,14 +79,16 @@ export function MenuFormModal({ open, initial, categories, onClose, onSubmit }: 
             type="button"
             onClick={onClose}
             className="h-11 rounded-xl bg-bg-subtle font-medium hover:bg-line"
-          >취소</button>
+          >
+            취소
+          </button>
           <button
             form="menu-form"
             type="submit"
             disabled={submitting}
             className="h-11 rounded-xl bg-accent text-white font-semibold hover:bg-accent-dark disabled:opacity-50"
           >
-            {submitting ? '저장 중…' : '저장'}
+            {submitting ? "저장 중…" : "저장"}
           </button>
         </div>
       }
@@ -88,7 +101,9 @@ export function MenuFormModal({ open, initial, categories, onClose, onSubmit }: 
             className={selectClass}
           >
             {categories.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
             ))}
           </select>
         </FormField>
@@ -118,7 +133,7 @@ export function MenuFormModal({ open, initial, categories, onClose, onSubmit }: 
           <input
             type="number"
             min={0}
-            step={500}
+            step={1}
             value={price}
             onChange={(e) => setPrice(Number(e.target.value) || 0)}
             className={inputClass}
