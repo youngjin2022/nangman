@@ -4,11 +4,14 @@ RUN corepack enable && corepack prepare pnpm@9.6.0 --activate
 
 WORKDIR /app
 
-COPY . .
+# Railway는 apps/api만 올리므로 필요한 파일을 미리 복사해둠
+COPY package.json ./
+COPY prisma/ ./prisma/
+COPY src/ ./src/
+COPY tsconfig.json ./
 
-RUN pnpm install --frozen-lockfile
-
-WORKDIR /app/apps/api
+# pnpm standalone 설치
+RUN pnpm install --ignore-workspace
 
 RUN pnpm prisma generate && pnpm tsc -p tsconfig.json
 
