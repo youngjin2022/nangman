@@ -1,15 +1,38 @@
-// admin-web 도메인 타입 - 추후 @nangman/shared-types로 점진 통합
-import type {
-  Category,
-  Menu,
-  MenuOptionGroup,
-  MenuOptionItem,
-  PaymentMethod,
-} from '@nangman/shared-types';
+// 공유 타입 직접 정의
+export type PaymentMethod = 'CARD' | 'CASH' | 'KAKAO' | 'NAVER' | 'TOSS';
 
-export type { Category, Menu, MenuOptionGroup, MenuOptionItem, PaymentMethod };
+export interface Category {
+  id: string;
+  name: string;
+  displayOrder: number;
+}
 
-// 관리자 화면 전용 확장 타입
+export interface MenuOptionItem {
+  id: string;
+  name: string;
+  additionalPrice: number;
+  isDefault?: boolean;
+}
+
+export interface MenuOptionGroup {
+  id: string;
+  name: string;
+  isRequired: boolean;
+  minSelect: number;
+  maxSelect: number;
+  items: MenuOptionItem[];
+}
+
+export interface Menu {
+  id: string;
+  categoryId: string;
+  name: string;
+  description?: string;
+  price: number;
+  imageUrl?: string;
+  isSoldOut: boolean;
+  optionGroups?: MenuOptionGroup[];
+}
 
 export interface AdminTable {
   id: string;
@@ -21,15 +44,14 @@ export interface AdminTable {
   createdAt: string;
 }
 
-// 매출 - 일별 시간대별
 export interface DailySalesPoint {
-  hour: number; // 0..23
+  hour: number;
   revenue: number;
   orderCount: number;
 }
 
 export interface DailySalesData {
-  date: string; // YYYY-MM-DD
+  date: string;
   totalRevenue: number;
   totalOrders: number;
   averageOrderValue: number;
@@ -38,15 +60,14 @@ export interface DailySalesData {
   topMenus: Array<{ menuName: string; quantity: number; revenue: number }>;
 }
 
-// 매출 - 월별 일자별
 export interface MonthlySalesPoint {
-  date: string; // YYYY-MM-DD
+  date: string;
   revenue: number;
   orderCount: number;
 }
 
 export interface MonthlySalesData {
-  month: string; // YYYY-MM
+  month: string;
   totalRevenue: number;
   totalOrders: number;
   daily: MonthlySalesPoint[];
