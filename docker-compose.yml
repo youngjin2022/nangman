@@ -1,0 +1,44 @@
+# 로컬 개발용 인프라 - PostgreSQL + Redis
+# Railway 프로덕션과 동일한 버전 매칭
+#
+# 실행:
+#   docker compose up -d
+#   docker compose down       # 정지
+#   docker compose down -v    # 정지 + 볼륨 삭제 (DB 초기화)
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: nangman-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: nangman
+      POSTGRES_PASSWORD: nangman
+      POSTGRES_DB: nangman
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U nangman -d nangman']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: nangman-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:

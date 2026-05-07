@@ -1,0 +1,4 @@
+{
+  "extends": "@nangman/tsconfig/base.json",
+  "include": ["src/**/*"]
+}

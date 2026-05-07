@@ -1,0 +1,11 @@
+{
+  "name": "@nangman/tsconfig",
+  "version": "0.0.1",
+  "private": true,
+  "files": [
+    "base.json",
+    "nextjs.json",
+    "vite.json",
+    "node.json"
+  ]
+}

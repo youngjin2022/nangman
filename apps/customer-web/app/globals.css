@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* iOS 입력 필드 자동 줌 방지 (16px 미만 시 줌 발생) */
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+
+  html,
+  body {
+    @apply bg-bg text-white;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none; /* 모바일 pull-to-refresh 방지 */
+  }
+
+  /* iOS 안전영역 대응 */
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+@layer utilities {
+  /* 스크롤바 숨김 (가로 카테고리 탭용) */
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}

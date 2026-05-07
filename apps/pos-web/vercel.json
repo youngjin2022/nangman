@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
+  "buildCommand": "cd ../.. && pnpm turbo run build --filter=pos-web",
+  "outputDirectory": "dist",
+  "ignoreCommand": "cd ../.. && npx turbo-ignore pos-web",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" }
+  ]
+}

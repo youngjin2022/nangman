@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body, #root { height: 100%; }
+  body {
+    @apply bg-bg text-ink;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin::-webkit-scrollbar { width: 8px; height: 8px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { @apply bg-line rounded; }
+}
+
+/* QR 인쇄 페이지 - 화면에서는 미리보기, 인쇄 시 A4 사이즈 */
+@media print {
+  body { background: white !important; }
+  .no-print { display: none !important; }
+  .print-page {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 15mm;
+    margin: 0 auto;
+    box-shadow: none !important;
+    page-break-after: always;
+  }
+}

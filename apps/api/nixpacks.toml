@@ -1,0 +1,21 @@
+# Railway Nixpacks 빌드 - pnpm 모노레포 + Prisma
+# 빌드 단계에서 prisma generate (클라이언트 생성), 기동 단계에서 migrate deploy
+
+[phases.setup]
+nixPkgs = ['nodejs_20', 'pnpm-9_x', 'openssl']
+
+[phases.install]
+cmds = ['cd ../.. && pnpm install --frozen-lockfile']
+
+[phases.build]
+# turbo가 의존성 그래프(@nangman/shared-types)도 함께 빌드
+# build 스크립트 내부에서 prisma generate + tsc 실행
+cmds = ['cd ../.. && pnpm turbo run build --filter=api...']
+
+[start]
+# 마이그레이션 적용 후 서버 시작
+# Prisma는 동시 마이그레이션 락을 보장하므로 다중 인스턴스 환경에서도 안전
+cmd = 'pnpm prisma migrate deploy && node dist/main.js'
+
+[variables]
+NODE_ENV = 'production'

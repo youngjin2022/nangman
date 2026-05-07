@@ -1,0 +1,22 @@
+{
+  "name": "낭만포차 모바일 주문",
+  "short_name": "낭만포차",
+  "description": "QR로 간편하게 주문하는 모바일 오더",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0F0F12",
+  "theme_color": "#0F0F12",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
