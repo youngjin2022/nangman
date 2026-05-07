@@ -38,7 +38,7 @@ export function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Link
           to="/menus"
-          className="block p-5 bg-bg-panel rounded-2xl border border-line hover:border-accent transition"
+          className="block p-4 sm:p-5 bg-bg-panel rounded-2xl border border-line hover:border-accent active:border-accent/80 transition touch-manipulation active:scale-[0.99]"
         >
           <div className="text-2xl mb-2">🍽️</div>
           <div className="text-base font-bold">메뉴 관리</div>
@@ -46,7 +46,7 @@ export function DashboardPage() {
         </Link>
         <Link
           to="/tables"
-          className="block p-5 bg-bg-panel rounded-2xl border border-line hover:border-accent transition"
+          className="block p-4 sm:p-5 bg-bg-panel rounded-2xl border border-line hover:border-accent active:border-accent/80 transition touch-manipulation active:scale-[0.99]"
         >
           <div className="text-2xl mb-2">🪑</div>
           <div className="text-base font-bold">테이블·QR</div>
@@ -54,7 +54,7 @@ export function DashboardPage() {
         </Link>
         <Link
           to="/sales/daily"
-          className="block p-5 bg-bg-panel rounded-2xl border border-line hover:border-accent transition"
+          className="block p-4 sm:p-5 bg-bg-panel rounded-2xl border border-line hover:border-accent active:border-accent/80 transition touch-manipulation active:scale-[0.99]"
         >
           <div className="text-2xl mb-2">📈</div>
           <div className="text-base font-bold">매출 분석</div>

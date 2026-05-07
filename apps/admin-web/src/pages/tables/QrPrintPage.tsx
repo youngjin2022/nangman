@@ -60,7 +60,8 @@ export function QrPrintPage() {
       {pages.length === 0 ? (
         <div className="text-center text-ink-muted py-20">활성 테이블이 없습니다</div>
       ) : (
-        pages.map((tablesOnPage, pIdx) => (
+        <div className="no-print overflow-x-auto pb-2 -mx-2 px-2 sm:mx-0 sm:px-0">
+        {pages.map((tablesOnPage, pIdx) => (
           <section
             key={pIdx}
             className={cn(
@@ -96,7 +97,8 @@ export function QrPrintPage() {
               })}
             </div>
           </section>
-        ))
+        ))}
+        </div>
       )}
     </div>
   );

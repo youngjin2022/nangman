@@ -1,6 +1,7 @@
 // 관리자 앱 셸 - 라우팅 + 사이드바 + 토스트
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { Sidebar } from '@/components/Sidebar';
+import { MobileBottomNav } from '@/components/MobileBottomNav';
 import { ToastHost } from '@/components/ToastHost';
 import { DashboardPage } from '@/pages/dashboard/DashboardPage';
 import { MenusPage } from '@/pages/menus/MenusPage';
@@ -12,10 +13,10 @@ import { MonthlySalesPage } from '@/pages/sales/MonthlySalesPage';
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="h-full flex">
+      <div className="h-full flex min-h-0">
         <Sidebar />
-        <main className="flex-1 overflow-y-auto scrollbar-thin">
-          <div className="p-6 max-w-[1400px] mx-auto">
+        <main className="flex-1 min-h-0 overflow-y-auto scrollbar-thin pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))] lg:pb-0">
+          <div className="p-4 sm:p-5 lg:p-6 max-w-[1400px] mx-auto w-full min-w-0">
             <Routes>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<DashboardPage />} />
@@ -28,6 +29,7 @@ export default function App() {
             </Routes>
           </div>
         </main>
+        <MobileBottomNav />
       </div>
       <ToastHost />
     </BrowserRouter>

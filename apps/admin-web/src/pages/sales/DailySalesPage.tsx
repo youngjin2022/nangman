@@ -9,6 +9,7 @@ import { StatCard } from '@/components/StatCard';
 import { getDailySales } from '@/lib/api';
 import type { DailySalesData } from '@/lib/types';
 import { formatKRW, formatNumber, todayISO } from '@/lib/utils';
+import { useMediaQuery } from '@/lib/useMediaQuery';
 
 const METHOD_LABEL: Record<string, string> = {
   CARD: '카드', CASH: '현금', KAKAO: '카카오', NAVER: '네이버', TOSS: '토스',
@@ -21,6 +22,7 @@ export function DailySalesPage() {
   const [date, setDate] = useState(todayISO());
   const [data, setData] = useState<DailySalesData | null>(null);
   const [loading, setLoading] = useState(false);
+  const compactCharts = useMediaQuery('(max-width: 1023px)');
 
   useEffect(() => {
     let cancelled = false;
@@ -40,7 +42,7 @@ export function DailySalesPage() {
             value={date}
             onChange={(e) => setDate(e.target.value)}
             max={todayISO()}
-            className="h-10 px-3 rounded-lg border border-line text-sm"
+            className="h-11 w-full max-w-[200px] sm:max-w-none px-3 rounded-lg border border-line text-base sm:text-sm"
           />
         }
       />
@@ -58,30 +60,32 @@ export function DailySalesPage() {
           </div>
 
           {/* 시간대별 매출 */}
-          <section className="bg-bg-panel rounded-2xl border border-line p-5">
-            <h3 className="text-sm font-bold mb-4">시간대별 매출</h3>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data.hourly}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E2E5EB" />
-                  <XAxis dataKey="hour" tickFormatter={(h) => `${h}시`} fontSize={11} />
-                  <YAxis tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} fontSize={11} />
-                  <Tooltip
-                    formatter={(v: number) => [formatKRW(v), '매출']}
-                    labelFormatter={(h) => `${h}시 ~ ${(h as number) + 1}시`}
-                    contentStyle={{ borderRadius: 8, fontSize: 12 }}
-                  />
-                  <Bar dataKey="revenue" fill="#2563EB" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+          <section className="bg-bg-panel rounded-2xl border border-line p-4 sm:p-5 overflow-hidden">
+            <h3 className="text-sm font-bold mb-3 sm:mb-4">시간대별 매출</h3>
+            <div className="-mx-2 sm:-mx-0 overflow-x-auto scrollbar-thin lg:overflow-visible">
+              <div className="min-w-[520px] lg:min-w-0 h-52 sm:h-64 px-2 sm:px-0">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={data.hourly}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E5EB" />
+                    <XAxis dataKey="hour" tickFormatter={(h) => `${h}시`} fontSize={11} />
+                    <YAxis tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} fontSize={11} />
+                    <Tooltip
+                      formatter={(v: number) => [formatKRW(v), '매출']}
+                      labelFormatter={(h) => `${h}시 ~ ${(h as number) + 1}시`}
+                      contentStyle={{ borderRadius: 8, fontSize: 12 }}
+                    />
+                    <Bar dataKey="revenue" fill="#2563EB" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           </section>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* 결제수단 분포 */}
-            <section className="bg-bg-panel rounded-2xl border border-line p-5">
-              <h3 className="text-sm font-bold mb-4">결제수단 분포</h3>
-              <div className="h-64">
+            <section className="bg-bg-panel rounded-2xl border border-line p-4 sm:p-5 overflow-hidden">
+              <h3 className="text-sm font-bold mb-3 sm:mb-4">결제수단 분포</h3>
+              <div className="h-56 sm:h-64 min-h-[14rem]">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -90,7 +94,7 @@ export function DailySalesPage() {
                       nameKey="method"
                       cx="50%"
                       cy="50%"
-                      outerRadius={80}
+                      outerRadius={compactCharts ? 56 : 80}
                       label={(entry) => METHOD_LABEL[entry.method as string] ?? entry.method}
                     >
                       {data.byMethod.map((_, i) => (
@@ -105,8 +109,8 @@ export function DailySalesPage() {
             </section>
 
             {/* 베스트셀러 */}
-            <section className="bg-bg-panel rounded-2xl border border-line p-5">
-              <h3 className="text-sm font-bold mb-4">베스트셀러 TOP 5</h3>
+            <section className="bg-bg-panel rounded-2xl border border-line p-4 sm:p-5">
+              <h3 className="text-sm font-bold mb-3 sm:mb-4">베스트셀러 TOP 5</h3>
               <div className="space-y-3">
                 {data.topMenus.map((m, idx) => (
                   <div key={m.menuName} className="flex items-center gap-3">

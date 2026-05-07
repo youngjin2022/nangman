@@ -78,7 +78,7 @@ export function MenuFormModal({
           <button
             type="button"
             onClick={onClose}
-            className="h-11 rounded-xl bg-bg-subtle font-medium hover:bg-line"
+            className="h-11 rounded-xl bg-bg-subtle font-medium hover:bg-line active:bg-line"
           >
             취소
           </button>
@@ -86,7 +86,7 @@ export function MenuFormModal({
             form="menu-form"
             type="submit"
             disabled={submitting}
-            className="h-11 rounded-xl bg-accent text-white font-semibold hover:bg-accent-dark disabled:opacity-50"
+            className="h-11 rounded-xl bg-accent text-white font-semibold hover:bg-accent-dark active:opacity-95 disabled:opacity-50"
           >
             {submitting ? "저장 중…" : "저장"}
           </button>

@@ -43,7 +43,7 @@ export function MenusPage() {
         right={
           <button
             onClick={() => setEditing('new')}
-            className="h-10 px-4 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-accent-dark"
+            className="h-11 px-4 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-accent-dark active:opacity-95 w-full sm:w-auto shrink-0"
           >
             + 메뉴 추가
           </button>
@@ -54,11 +54,11 @@ export function MenusPage() {
         {/* 메뉴 테이블 */}
         <section className="bg-bg-panel rounded-2xl border border-line">
           {/* 필터 바 */}
-          <div className="p-4 border-b border-line flex flex-wrap items-center gap-2">
+          <div className="p-3 sm:p-4 border-b border-line flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2">
             <select
               value={filterCat}
               onChange={(e) => setFilterCat(e.target.value)}
-              className="h-9 px-3 rounded-lg border border-line text-sm"
+              className="h-11 w-full sm:w-auto min-w-0 sm:min-w-[140px] px-3 rounded-lg border border-line text-base sm:text-sm shrink-0"
             >
               <option value="all">전체 카테고리</option>
               {[...categories].sort((a, b) => a.displayOrder - b.displayOrder).map((c) => (
@@ -69,15 +69,65 @@ export function MenusPage() {
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               placeholder="메뉴명 검색"
-              className="flex-1 min-w-40 h-9 px-3 rounded-lg border border-line text-sm"
+              className="flex-1 min-w-0 min-h-11 px-3 rounded-lg border border-line text-base sm:text-sm"
             />
             <span className="text-xs text-ink-muted ml-auto">
               {loading ? '불러오는 중…' : `${filtered.length}개 / 전체 ${menus.length}개`}
             </span>
           </div>
 
-          {/* 테이블 */}
-          <div className="overflow-x-auto scrollbar-thin">
+          {/* 모바일·태블릿: 카드 */}
+          <div className="lg:hidden divide-y divide-line px-4 pb-1">
+            {filtered.map((m) => (
+              <div key={m.id} className={cn('py-4', m.isSoldOut && 'opacity-60')}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="font-medium text-[15px] leading-snug">{m.name}</div>
+                    {m.description && (
+                      <div className="text-xs text-ink-muted mt-0.5 line-clamp-2">{m.description}</div>
+                    )}
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2 text-xs text-ink-muted">
+                      <span>{catNameOf(m.categoryId)}</span>
+                      <span className="tabular-nums font-semibold text-ink">{formatKRW(m.price)}</span>
+                    </div>
+                  </div>
+                  <ToggleSwitch
+                    checked={m.isSoldOut}
+                    onChange={async (v) => {
+                      await toggleSoldOut(m.id, v);
+                      pushToast({
+                        kind: v ? 'warn' : 'info',
+                        title: v ? '품절 처리됨' : '품절 해제됨',
+                        message: m.name,
+                      });
+                    }}
+                  />
+                </div>
+                <div className="flex gap-2 mt-3">
+                  <button
+                    type="button"
+                    onClick={() => setEditing(m)}
+                    className="flex-1 h-11 rounded-xl bg-bg-subtle text-sm font-medium active:bg-line"
+                  >
+                    수정
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDeleteTarget(m)}
+                    className="flex-1 h-11 rounded-xl border border-bad/30 text-bad text-sm font-medium active:bg-bad/10"
+                  >
+                    삭제
+                  </button>
+                </div>
+              </div>
+            ))}
+            {filtered.length === 0 && !loading && (
+              <div className="text-center py-10 text-ink-muted text-sm">메뉴가 없습니다</div>
+            )}
+          </div>
+
+          {/* 데스크톱: 테이블 */}
+          <div className="hidden lg:block overflow-x-auto scrollbar-thin">
             <table className="w-full text-sm">
               <thead className="bg-bg-subtle text-ink-muted text-xs">
                 <tr>
@@ -179,6 +229,7 @@ export function MenusPage() {
 function ToggleSwitch({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <button
+      type="button"
       onClick={() => onChange(!checked)}
       className={cn(
         'relative inline-flex w-11 h-6 rounded-full transition',

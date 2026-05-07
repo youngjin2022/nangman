@@ -66,7 +66,7 @@ export function CategoryManager() {
   return (
     <div className="bg-bg-panel rounded-2xl border border-line p-4">
       <h3 className="text-sm font-bold mb-3">카테고리 관리</h3>
-      <div className="flex gap-2 mb-3">
+      <div className="flex flex-col sm:flex-row gap-2 mb-3">
         <input
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
@@ -75,8 +75,9 @@ export function CategoryManager() {
           className={inputClass}
         />
         <button
+          type="button"
           onClick={handleAdd}
-          className="shrink-0 px-4 h-10 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-accent-dark"
+          className="shrink-0 px-4 h-11 sm:h-10 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-accent-dark active:opacity-95"
         >
           추가
         </button>
@@ -88,9 +89,9 @@ export function CategoryManager() {
           return (
             <li
               key={c.id}
-              className="flex items-center gap-2 p-2 rounded-lg hover:bg-bg-subtle"
+              className="flex flex-wrap items-center gap-2 p-2 rounded-lg hover:bg-bg-subtle"
             >
-              <span className="text-xs text-ink-muted w-6 tabular-nums">#{idx + 1}</span>
+              <span className="text-xs text-ink-muted w-6 tabular-nums shrink-0">#{idx + 1}</span>
               {editingId === c.id ? (
                 <>
                   <input
@@ -98,19 +99,21 @@ export function CategoryManager() {
                     value={editingName}
                     onChange={(e) => setEditingName(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
-                    className={inputClass}
+                    className={`${inputClass} flex-1 min-w-[140px]`}
                   />
-                  <button onClick={saveEdit} className="h-9 px-3 rounded-lg bg-accent text-white text-xs font-semibold">저장</button>
-                  <button onClick={() => setEditingId(null)} className="h-9 px-3 rounded-lg bg-bg-subtle text-xs">취소</button>
+                  <button type="button" onClick={saveEdit} className="h-11 sm:h-9 px-4 rounded-lg bg-accent text-white text-sm font-semibold active:opacity-95">저장</button>
+                  <button type="button" onClick={() => setEditingId(null)} className="h-11 sm:h-9 px-4 rounded-lg bg-bg-subtle text-sm active:bg-line">취소</button>
                 </>
               ) : (
                 <>
-                  <span className="flex-1 text-sm font-medium">{c.name}</span>
-                  <span className="text-[11px] text-ink-muted">{count}개</span>
-                  <button onClick={() => move(c, -1)} disabled={idx === 0} className="w-7 h-7 rounded hover:bg-line disabled:opacity-30">↑</button>
-                  <button onClick={() => move(c, 1)} disabled={idx === sorted.length - 1} className="w-7 h-7 rounded hover:bg-line disabled:opacity-30">↓</button>
-                  <button onClick={() => startEdit(c)} className="h-7 px-2 rounded text-xs hover:bg-line">수정</button>
-                  <button onClick={() => setDeleteTarget(c)} className="h-7 px-2 rounded text-xs text-bad hover:bg-bad/10">삭제</button>
+                  <span className="flex-1 min-w-[6rem] text-sm font-medium">{c.name}</span>
+                  <span className="text-[11px] text-ink-muted shrink-0">{count}개</span>
+                  <div className="flex items-center gap-1 w-full sm:w-auto justify-end sm:justify-start sm:ml-auto">
+                    <button type="button" onClick={() => move(c, -1)} disabled={idx === 0} className="w-11 h-11 sm:w-9 sm:h-9 shrink-0 rounded-lg hover:bg-line active:bg-line disabled:opacity-30 text-lg leading-none">↑</button>
+                    <button type="button" onClick={() => move(c, 1)} disabled={idx === sorted.length - 1} className="w-11 h-11 sm:w-9 sm:h-9 shrink-0 rounded-lg hover:bg-line active:bg-line disabled:opacity-30 text-lg leading-none">↓</button>
+                    <button type="button" onClick={() => startEdit(c)} className="h-11 px-3 rounded-lg text-sm font-medium bg-bg-subtle active:bg-line">수정</button>
+                    <button type="button" onClick={() => setDeleteTarget(c)} className="h-11 px-3 rounded-lg text-sm font-medium text-bad active:bg-bad/15">삭제</button>
+                  </div>
                 </>
               )}
             </li>

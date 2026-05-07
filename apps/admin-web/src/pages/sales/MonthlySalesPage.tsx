@@ -9,6 +9,7 @@ import { StatCard } from '@/components/StatCard';
 import { getMonthlySales } from '@/lib/api';
 import type { MonthlySalesData } from '@/lib/types';
 import { formatKRW, formatNumber, thisMonthISO } from '@/lib/utils';
+import { useMediaQuery } from '@/lib/useMediaQuery';
 
 const METHOD_LABEL: Record<string, string> = {
   CARD: '카드', CASH: '현금', KAKAO: '카카오', NAVER: '네이버', TOSS: '토스',
@@ -19,6 +20,7 @@ export function MonthlySalesPage() {
   const [month, setMonth] = useState(thisMonthISO());
   const [data, setData] = useState<MonthlySalesData | null>(null);
   const [loading, setLoading] = useState(false);
+  const compactCharts = useMediaQuery('(max-width: 1023px)');
 
   useEffect(() => {
     let cancelled = false;
@@ -38,7 +40,7 @@ export function MonthlySalesPage() {
             value={month}
             onChange={(e) => setMonth(e.target.value)}
             max={thisMonthISO()}
-            className="h-10 px-3 rounded-lg border border-line text-sm"
+            className="h-11 w-full max-w-[200px] sm:max-w-none px-3 rounded-lg border border-line text-base sm:text-sm"
           />
         }
       />
@@ -61,46 +63,48 @@ export function MonthlySalesPage() {
           </div>
 
           {/* 일자별 추이 */}
-          <section className="bg-bg-panel rounded-2xl border border-line p-5">
-            <h3 className="text-sm font-bold mb-4">일자별 매출 추이</h3>
-            <div className="h-72">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={data.daily}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E2E5EB" />
-                  <XAxis
-                    dataKey="date"
-                    tickFormatter={(d) => d.split('-')[2]}
-                    fontSize={11}
-                  />
-                  <YAxis tickFormatter={(v) => `${(v / 10000).toFixed(0)}만`} fontSize={11} />
-                  <Tooltip
-                    formatter={(v: number) => [formatKRW(v), '매출']}
-                    contentStyle={{ borderRadius: 8, fontSize: 12 }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="revenue"
-                    stroke="#2563EB"
-                    strokeWidth={2}
-                    dot={{ r: 3 }}
-                    activeDot={{ r: 5 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+          <section className="bg-bg-panel rounded-2xl border border-line p-4 sm:p-5 overflow-hidden">
+            <h3 className="text-sm font-bold mb-3 sm:mb-4">일자별 매출 추이</h3>
+            <div className="-mx-2 sm:-mx-0 overflow-x-auto scrollbar-thin lg:overflow-visible">
+              <div className="min-w-[560px] lg:min-w-0 h-60 sm:h-72 px-2 sm:px-0">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={data.daily}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E5EB" />
+                    <XAxis
+                      dataKey="date"
+                      tickFormatter={(d) => d.split('-')[2]}
+                      fontSize={11}
+                    />
+                    <YAxis tickFormatter={(v) => `${(v / 10000).toFixed(0)}만`} fontSize={11} />
+                    <Tooltip
+                      formatter={(v: number) => [formatKRW(v), '매출']}
+                      contentStyle={{ borderRadius: 8, fontSize: 12 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="revenue"
+                      stroke="#2563EB"
+                      strokeWidth={2}
+                      dot={{ r: 3 }}
+                      activeDot={{ r: 5 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           </section>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <section className="bg-bg-panel rounded-2xl border border-line p-5">
-              <h3 className="text-sm font-bold mb-4">결제수단 분포</h3>
-              <div className="h-64">
+            <section className="bg-bg-panel rounded-2xl border border-line p-4 sm:p-5 overflow-hidden">
+              <h3 className="text-sm font-bold mb-3 sm:mb-4">결제수단 분포</h3>
+              <div className="h-56 sm:h-64 min-h-[14rem]">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
                       data={data.byMethod}
                       dataKey="revenue"
                       nameKey="method"
-                      cx="50%" cy="50%" outerRadius={80}
+                      cx="50%" cy="50%" outerRadius={compactCharts ? 56 : 80}
                       label={(entry) => METHOD_LABEL[entry.method as string] ?? entry.method}
                     >
                       {data.byMethod.map((_, i) => (
@@ -114,8 +118,8 @@ export function MonthlySalesPage() {
               </div>
             </section>
 
-            <section className="bg-bg-panel rounded-2xl border border-line p-5">
-              <h3 className="text-sm font-bold mb-4">월간 베스트셀러 TOP 5</h3>
+            <section className="bg-bg-panel rounded-2xl border border-line p-4 sm:p-5">
+              <h3 className="text-sm font-bold mb-3 sm:mb-4">월간 베스트셀러 TOP 5</h3>
               <div className="space-y-3">
                 {data.topMenus.map((m, idx) => (
                   <div key={m.menuName} className="flex items-center gap-3">

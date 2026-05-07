@@ -7,12 +7,28 @@
   body {
     @apply bg-bg text-ink;
     -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
 @layer utilities {
+  .tap-highlight-none {
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* 하단 탭·모달 푸터 — 홈 인디케이터 여백 */
+  .safe-bottom {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+  }
+  .safe-bottom-nav {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
   .scrollbar-thin::-webkit-scrollbar { width: 8px; height: 8px; }
   .scrollbar-thin::-webkit-scrollbar-thumb { @apply bg-line rounded; }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 /* QR 인쇄 페이지 - 화면에서는 미리보기, 인쇄 시 A4 사이즈 */

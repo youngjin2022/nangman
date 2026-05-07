@@ -27,7 +27,7 @@ export function FormField({ label, hint, required, error, children }: FormFieldP
 }
 
 export const inputClass =
-  'w-full h-10 px-3 rounded-lg border border-line bg-bg-panel text-sm focus:outline-none focus:border-accent';
+  'w-full h-11 px-3 rounded-lg border border-line bg-bg-panel text-base sm:text-sm focus:outline-none focus:border-accent lg:h-10';
 export const textareaClass =
-  'w-full p-3 rounded-lg border border-line bg-bg-panel text-sm focus:outline-none focus:border-accent resize-y';
+  'w-full min-h-[5.5rem] p-3 rounded-lg border border-line bg-bg-panel text-base sm:text-sm focus:outline-none focus:border-accent resize-y';
 export const selectClass = inputClass;

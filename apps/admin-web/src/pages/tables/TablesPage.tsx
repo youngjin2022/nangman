@@ -7,6 +7,7 @@ import { PageHeader } from '@/components/PageHeader';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { QrCodeImg } from '@/components/QrCodeImg';
 import { cn } from '@/lib/utils';
+import { useMediaQuery } from '@/lib/useMediaQuery';
 import type { AdminTable } from '@/lib/types';
 import { TableFormModal } from './TableFormModal';
 
@@ -14,6 +15,7 @@ const CUSTOMER_BASE = import.meta.env.VITE_CUSTOMER_BASE_URL ?? 'http://localhos
 const qrUrlOf = (token: string) => `${CUSTOMER_BASE}/t/${token}`;
 
 export function TablesPage() {
+  const narrowQr = useMediaQuery('(max-width: 1023px)');
   const tables = useTablesStore((s) => s.tables);
   const loading = useTablesStore((s) => s.loading);
   const load = useTablesStore((s) => s.load);
@@ -38,13 +40,14 @@ export function TablesPage() {
           <>
             <Link
               to="/tables/qr-print"
-              className="h-10 px-4 rounded-lg bg-bg-panel border border-line text-sm font-medium hover:bg-bg-subtle inline-flex items-center"
+              className="h-11 px-4 rounded-lg bg-bg-panel border border-line text-sm font-medium hover:bg-bg-subtle active:bg-bg-subtle inline-flex items-center justify-center whitespace-nowrap"
             >
               🖨 QR 인쇄
             </Link>
             <button
+              type="button"
               onClick={() => setEditing('new')}
-              className="h-10 px-4 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-accent-dark"
+              className="h-11 px-4 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-accent-dark active:opacity-95"
             >
               + 테이블 추가
             </button>
@@ -68,25 +71,34 @@ export function TablesPage() {
                   <div className="text-xs text-ink-muted mt-0.5">{t.capacity}인 · {t.isActive ? '활성' : '비활성'}</div>
                 </div>
               </div>
-              <div className="mt-4 flex justify-center">
-                <QrCodeImg text={qrUrlOf(t.qrToken)} size={140} className="rounded-lg" />
+              <div className="mt-4 flex justify-center px-2">
+                <QrCodeImg text={qrUrlOf(t.qrToken)} size={narrowQr ? 172 : 148} className="rounded-lg shrink-0" />
               </div>
               <div className="mt-3 text-[11px] text-ink-muted truncate text-center">
                 토큰: {t.qrToken}
               </div>
-              <div className="mt-3 grid grid-cols-3 gap-1 text-xs">
+              <div className="mt-3 grid grid-cols-3 gap-1.5 text-xs">
                 <button
+                  type="button"
                   onClick={() => setEditing(t)}
-                  className="h-9 rounded-lg bg-bg-subtle hover:bg-line"
-                >수정</button>
+                  className="h-11 sm:h-10 rounded-lg bg-bg-subtle hover:bg-line active:bg-line font-medium px-1"
+                >
+                  수정
+                </button>
                 <button
+                  type="button"
                   onClick={() => setRotateTarget(t)}
-                  className="h-9 rounded-lg bg-bg-subtle hover:bg-line"
-                >QR재발급</button>
+                  className="h-11 sm:h-10 rounded-lg bg-bg-subtle hover:bg-line active:bg-line font-medium px-1 leading-tight"
+                >
+                  QR재발급
+                </button>
                 <button
+                  type="button"
                   onClick={() => setDeleteTarget(t)}
-                  className="h-9 rounded-lg text-bad hover:bg-bad/10"
-                >삭제</button>
+                  className="h-11 sm:h-10 rounded-lg text-bad hover:bg-bad/10 active:bg-bad/15 font-medium px-1"
+                >
+                  삭제
+                </button>
               </div>
             </div>
           ))}
