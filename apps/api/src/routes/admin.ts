@@ -1,6 +1,7 @@
 // 관리자 라우트 - 메뉴/카테고리/테이블 CRUD + 매출 집계
 import { Router } from 'express';
 import { randomBytes } from 'node:crypto';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma';
 import { emitMenuUpdated } from '../lib/socket';
 
@@ -25,9 +26,18 @@ router.post('/categories', async (req, res) => {
 });
 
 router.patch('/categories/:id', async (req, res) => {
+  const body = req.body as Record<string, unknown>;
+  const data: Prisma.MenuCategoryUncheckedUpdateInput = {};
+  if (typeof body.name === 'string') data.name = body.name.trim();
+  if (typeof body.displayOrder === 'number' && Number.isFinite(body.displayOrder)) {
+    data.displayOrder = Math.round(body.displayOrder);
+  }
+  if (Object.keys(data).length === 0) {
+    return res.status(400).json({ error: 'no_updatable_fields' });
+  }
   const updated = await prisma.menuCategory.update({
-    where: { id: req.params.id },
-    data: req.body,
+    where: { id: req.params.id, storeId: STORE_ID },
+    data,
   });
   res.json(updated);
 });
@@ -53,6 +63,7 @@ router.post('/menus', async (req, res) => {
   const body = req.body as {
     categoryId: string; name: string; description?: string;
     price: number; isSoldOut?: boolean;
+    imageUrl?: string | null;
   };
   const created = await prisma.menu.create({
     data: {
@@ -62,6 +73,9 @@ router.post('/menus', async (req, res) => {
       description: body.description,
       price: body.price,
       isSoldOut: body.isSoldOut ?? false,
+      ...(body.imageUrl !== undefined &&
+        body.imageUrl !== null &&
+        body.imageUrl !== '' && { imageUrl: body.imageUrl }),
     },
   });
   emitMenuUpdated(STORE_ID, created.id);
@@ -69,13 +83,28 @@ router.post('/menus', async (req, res) => {
 });
 
 router.patch('/menus/:id', async (req, res) => {
-  const { optionGroups, ...patch } = req.body as Record<string, unknown>;
-  const updated = await prisma.menu.update({
-    where: { id: req.params.id },
-    data: patch,
-  });
-  emitMenuUpdated(STORE_ID, updated.id);
-  res.json(updated);
+  try {
+    const body = (req.body ?? {}) as Record<string, unknown>;
+    const data = buildMenuPatchData(body);
+    if (Object.keys(data).length === 0) {
+      return res.status(400).json({ error: 'no_updatable_fields' });
+    }
+    const updated = await prisma.menu.update({
+      where: { id: req.params.id, storeId: STORE_ID },
+      data,
+      include: { optionGroups: { include: { items: true } } },
+    });
+    emitMenuUpdated(STORE_ID, updated.id);
+    res.json(updated);
+  } catch (e: unknown) {
+    const code = typeof e === 'object' && e !== null && 'code' in e ? String((e as { code: unknown }).code) : '';
+    if (code === 'P2025') {
+      return res.status(404).json({ error: 'menu_not_found' });
+    }
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error('[admin] PATCH /menus/:id', e);
+    res.status(500).json({ error: 'menu_update_failed', message: msg });
+  }
 });
 
 router.delete('/menus/:id', async (req, res) => {
@@ -307,5 +336,45 @@ router.get('/sales/monthly', async (req, res) => {
     topMenus,
   });
 });
+
+function buildMenuPatchData(body: Record<string, unknown>): Prisma.MenuUncheckedUpdateInput {
+  const data: Prisma.MenuUncheckedUpdateInput = {};
+  if (typeof body.categoryId === 'string' && body.categoryId.trim()) {
+    data.categoryId = body.categoryId.trim();
+  }
+  if (typeof body.name === 'string') {
+    data.name = body.name.trim();
+  }
+  if ('description' in body) {
+    if (body.description === null || body.description === '') {
+      data.description = null;
+    } else if (typeof body.description === 'string') {
+      const d = body.description.trim();
+      data.description = d.length ? d : null;
+    }
+  }
+  if (body.price !== undefined && body.price !== null && `${body.price}` !== '') {
+    const p = typeof body.price === 'number' ? body.price : Number(body.price);
+    if (!Number.isNaN(p) && p >= 0) data.price = Math.round(p);
+  }
+  if (typeof body.isSoldOut === 'boolean') {
+    data.isSoldOut = body.isSoldOut;
+  }
+  if ('imageUrl' in body) {
+    if (body.imageUrl === null || body.imageUrl === '') {
+      data.imageUrl = null;
+    } else if (typeof body.imageUrl === 'string') {
+      const u = body.imageUrl.trim();
+      data.imageUrl = u.length ? u : null;
+    }
+  }
+  if (typeof body.displayOrder === 'number' && Number.isFinite(body.displayOrder)) {
+    data.displayOrder = Math.round(body.displayOrder);
+  }
+  if (typeof body.isActive === 'boolean') {
+    data.isActive = body.isActive;
+  }
+  return data;
+}
 
 export default router;

@@ -37,7 +37,7 @@ export type Menu = {
   name: string;
   description?: string;
   price: number;
-  imageUrl?: string;
+  imageUrl?: string | null;
   isSoldOut: boolean;
   optionGroups?: MenuOptionGroup[];
 };

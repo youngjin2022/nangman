@@ -109,6 +109,12 @@ export function MenuDetailSheet({ menu, onClose }: MenuDetailSheetProps) {
 
         {/* 스크롤 영역 */}
         <div className="overflow-y-auto px-5 pb-4">
+          {menu.imageUrl && (
+            <div className="w-full aspect-[4/3] max-h-52 mt-1 mb-4 rounded-2xl overflow-hidden bg-bg-elevated">
+              {/* eslint-disable-next-line @next/next/no-img-element -- 외부 저장소 URL */}
+              <img src={menu.imageUrl} alt={menu.name} className="w-full h-full object-cover" />
+            </div>
+          )}
           <h2 className="text-xl font-bold">{menu.name}</h2>
           {menu.description && (
             <p className="text-sm text-muted mt-1">{menu.description}</p>

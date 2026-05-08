@@ -30,3 +30,16 @@ export function genToken(prefix = 'tbl'): string {
   const r = Math.random().toString(36).slice(2, 10);
   return `${prefix}-${r}`;
 }
+
+/** 메뉴 사진 URL — 비우면 undefined, http(s)만 허용 */
+export function parseMenuImageUrl(raw: string): string | undefined {
+  const t = raw.trim();
+  if (!t) return undefined;
+  try {
+    const u = new URL(t);
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return undefined;
+    return u.href;
+  } catch {
+    return undefined;
+  }
+}

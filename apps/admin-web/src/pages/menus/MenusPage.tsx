@@ -81,6 +81,13 @@ export function MenusPage() {
             {filtered.map((m) => (
               <div key={m.id} className={cn('py-4', m.isSoldOut && 'opacity-60')}>
                 <div className="flex items-start justify-between gap-3">
+                  <div className="shrink-0 w-14 h-14 rounded-xl overflow-hidden bg-bg-subtle border border-line flex items-center justify-center text-xl">
+                    {m.imageUrl ? (
+                      <img src={m.imageUrl} alt={m.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <span aria-hidden>🍶</span>
+                    )}
+                  </div>
                   <div className="min-w-0 flex-1">
                     <div className="font-medium text-[15px] leading-snug">{m.name}</div>
                     {m.description && (
@@ -131,6 +138,7 @@ export function MenusPage() {
             <table className="w-full text-sm">
               <thead className="bg-bg-subtle text-ink-muted text-xs">
                 <tr>
+                  <th className="w-14 px-2 py-2 font-medium text-center"> </th>
                   <th className="text-left px-4 py-2 font-medium">메뉴</th>
                   <th className="text-left px-4 py-2 font-medium">카테고리</th>
                   <th className="text-right px-4 py-2 font-medium">가격</th>
@@ -141,6 +149,15 @@ export function MenusPage() {
               <tbody className="divide-y divide-line">
                 {filtered.map((m) => (
                   <tr key={m.id} className={cn('hover:bg-bg-subtle/50', m.isSoldOut && 'opacity-60')}>
+                    <td className="px-2 py-2 align-middle">
+                      <div className="w-12 h-12 rounded-lg overflow-hidden bg-bg-subtle border border-line flex items-center justify-center text-lg shrink-0 mx-auto">
+                        {m.imageUrl ? (
+                          <img src={m.imageUrl} alt={m.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <span aria-hidden>🍶</span>
+                        )}
+                      </div>
+                    </td>
                     <td className="px-4 py-3">
                       <div className="font-medium">{m.name}</div>
                       {m.description && (
@@ -176,7 +193,7 @@ export function MenusPage() {
                 ))}
                 {filtered.length === 0 && !loading && (
                   <tr>
-                    <td colSpan={5} className="text-center py-10 text-ink-muted text-sm">
+                    <td colSpan={6} className="text-center py-10 text-ink-muted text-sm">
                       메뉴가 없습니다
                     </td>
                   </tr>

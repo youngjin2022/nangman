@@ -78,6 +78,7 @@ export type Menu = {
   name: string;
   price: number;
   isSoldOut: boolean;
+  imageUrl?: string | null;
   optionGroups?: MenuOptionGroup[];
 };
 

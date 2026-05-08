@@ -8,6 +8,7 @@ import {
   textareaClass,
 } from "@/components/FormField";
 import type { Category, Menu } from "@/lib/types";
+import { parseMenuImageUrl } from "@/lib/utils";
 
 interface MenuFormModalProps {
   open: boolean;
@@ -29,6 +30,7 @@ export function MenuFormModal({
   const [price, setPrice] = useState<number>(0);
   const [categoryId, setCategoryId] = useState("");
   const [isSoldOut, setIsSoldOut] = useState(false);
+  const [imageUrlRaw, setImageUrlRaw] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,6 +41,7 @@ export function MenuFormModal({
     setPrice(initial?.price ?? 0);
     setCategoryId(initial?.categoryId ?? categories[0]?.id ?? "");
     setIsSoldOut(initial?.isSoldOut ?? false);
+    setImageUrlRaw(initial?.imageUrl ?? "");
     setError(null);
   }, [open, initial, categories]);
 
@@ -48,17 +51,27 @@ export function MenuFormModal({
     if (!name.trim()) return setError("메뉴명을 입력해 주세요");
     if (!categoryId) return setError("카테고리를 선택해 주세요");
     if (price < 0) return setError("가격은 0원 이상이어야 합니다");
+    const imgTrim = imageUrlRaw.trim();
+    if (imgTrim && parseMenuImageUrl(imgTrim) === undefined) {
+      return setError("사진 URL은 http:// 또는 https:// 로 시작하는 주소만 사용할 수 있습니다");
+    }
+    const parsed = imgTrim ? parseMenuImageUrl(imgTrim) : undefined;
+
     setSubmitting(true);
     try {
-      await onSubmit({
+      const payload: Omit<Menu, "id"> = {
         categoryId,
         name: name.trim(),
         description: description.trim() || undefined,
         price,
         isSoldOut,
-        // 옵션 그룹은 별도 화면에서 관리 - 신규 시 비움
-        optionGroups: initial?.optionGroups,
-      });
+      };
+      if (initial) {
+        payload.imageUrl = parsed ?? null;
+      } else if (parsed !== undefined) {
+        payload.imageUrl = parsed;
+      }
+      await onSubmit(payload);
       onClose();
     } catch (e: any) {
       setError(e?.message ?? "저장 실패");
@@ -138,6 +151,36 @@ export function MenuFormModal({
             onChange={(e) => setPrice(Number(e.target.value) || 0)}
             className={inputClass}
           />
+        </FormField>
+
+        <FormField
+          label="사진(URL)"
+          hint="Cloudinary, S3, Imgur 등에 올린 이미지의 https 주소를 붙여 넣기. 비우면 손님 화면에서 기본 아이콘만 표시됩니다."
+        >
+          <input
+            value={imageUrlRaw}
+            onChange={(e) => setImageUrlRaw(e.target.value)}
+            className={inputClass}
+            placeholder="https://…"
+            inputMode="url"
+            autoComplete="off"
+          />
+          {parseMenuImageUrl(imageUrlRaw.trim()) && (
+            <div className="mt-2 flex items-start gap-3">
+              <img
+                src={parseMenuImageUrl(imageUrlRaw.trim())!}
+                alt="미리보기"
+                className="w-20 h-20 rounded-xl object-cover border border-line shrink-0 bg-bg-subtle"
+              />
+              <button
+                type="button"
+                onClick={() => setImageUrlRaw("")}
+                className="text-sm text-bad font-medium hover:underline"
+              >
+                사진 제거
+              </button>
+            </div>
+          )}
         </FormField>
 
         <FormField label="품절 여부">

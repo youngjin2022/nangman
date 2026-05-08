@@ -146,20 +146,31 @@ export function MenuPickerDialog({ open, tableId, onClose }: MenuPickerDialogPro
                     onClick={() => handleMenuClick(m)}
                     disabled={m.isSoldOut}
                     className={cn(
-                      'relative p-3 rounded-xl border text-left transition',
-                      'min-h-[5.25rem] flex flex-col justify-between',
+                      'relative p-2 rounded-xl border text-left transition overflow-hidden',
+                      'flex flex-col',
                       m.isSoldOut
                         ? 'bg-bg-subtle border-line opacity-50 cursor-not-allowed'
                         : 'bg-bg-panel border-line hover:border-accent active:scale-95',
                     )}
                   >
-                    <div className="flex items-start gap-1">
-                      <span className="text-sm font-medium leading-tight line-clamp-2">{m.name}</span>
-                      {m.isSoldOut && (
-                        <span className="text-[10px] px-1 rounded bg-red-100 text-red-600">품절</span>
+                    <div className="aspect-square w-full rounded-lg overflow-hidden bg-bg-subtle mb-2 shrink-0">
+                      {m.imageUrl ? (
+                        <img
+                          src={m.imageUrl}
+                          alt={m.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-2xl">🍽️</div>
                       )}
                     </div>
-                    <span className="text-sm font-bold tabular-nums">{formatKRW(m.price)}</span>
+                    <div className="flex items-start gap-1 min-h-[2.5rem]">
+                      <span className="text-sm font-medium leading-tight line-clamp-2">{m.name}</span>
+                      {m.isSoldOut && (
+                        <span className="text-[10px] px-1 rounded bg-red-100 text-red-600 shrink-0">품절</span>
+                      )}
+                    </div>
+                    <span className="text-sm font-bold tabular-nums mt-1">{formatKRW(m.price)}</span>
                   </button>
                 ))}
               </div>
@@ -307,9 +318,20 @@ function OptionSheet({
   return (
     <div className="absolute inset-0 z-10 flex items-center justify-center p-6 bg-black/50 animate-fade-in">
       <div className="w-full max-w-md bg-bg-panel rounded-2xl shadow-xl animate-slide-up max-h-[80vh] flex flex-col">
-        <div className="p-5 border-b border-line">
-          <h3 className="text-lg font-bold">{menu.name}</h3>
-          <p className="text-sm text-ink-muted">{formatKRW(menu.price)}</p>
+        <div className="p-5 border-b border-line flex gap-4 items-start">
+          {menu.imageUrl ? (
+            <div className="w-20 h-20 rounded-xl overflow-hidden bg-bg-subtle shrink-0 border border-line">
+              <img src={menu.imageUrl} alt={menu.name} className="w-full h-full object-cover" />
+            </div>
+          ) : (
+            <div className="w-20 h-20 rounded-xl bg-bg-subtle shrink-0 flex items-center justify-center text-3xl border border-line">
+              🍽️
+            </div>
+          )}
+          <div className="min-w-0">
+            <h3 className="text-lg font-bold">{menu.name}</h3>
+            <p className="text-sm text-ink-muted">{formatKRW(menu.price)}</p>
+          </div>
         </div>
         <div className="flex-1 overflow-y-auto p-5 space-y-5">
           {menu.optionGroups?.map((g) => (
