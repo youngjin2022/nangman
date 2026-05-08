@@ -6,7 +6,7 @@ import {
   emitOrderCreated, emitOrderUpdated, emitPaymentApproved, emitTableCleared,
 } from '../lib/socket';
 
-const router = Router();
+const router: Router = Router();
 
 // 매장 ID는 임시 고정 (멀티테넌트 도입 전) - 쿼리 파라미터로 오버라이드 허용
 const STORE_ID = process.env.DEFAULT_STORE_ID ?? 'store-001';

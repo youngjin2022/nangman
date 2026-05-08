@@ -2,7 +2,7 @@
 import { Router } from 'express';
 import { prisma } from '../lib/prisma';
 
-const router = Router();
+const router: Router = Router();
 
 router.get('/', async (_req, res) => {
   try {

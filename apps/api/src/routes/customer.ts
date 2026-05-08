@@ -4,7 +4,7 @@ import { prisma } from '../lib/prisma';
 import { nextOrderNumber } from '../lib/order-number';
 import { emitOrderCreated } from '../lib/socket';
 
-const router = Router();
+const router: Router = Router();
 
 // QR 토큰 → 테이블 정보
 router.get('/tables/by-token/:token', async (req, res) => {

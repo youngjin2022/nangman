@@ -62,6 +62,31 @@ export async function deleteMenu(id: string): Promise<void> {
   await jsonFetch(`/admin/menus/${id}`, { method: 'DELETE' });
 }
 
+/** multipart `image` 필드 — 서버에서 S3 업로드 후 공개 URL 반환 */
+export async function uploadMenuImage(file: File): Promise<{ imageUrl: string; key: string }> {
+  if (!API_URL) {
+    throw new Error('VITE_API_URL이 설정되어 있지 않습니다');
+  }
+  const body = new FormData();
+  body.append('image', file);
+  const res = await fetch(`${API_URL}/admin/uploads/menu-image`, {
+    method: 'POST',
+    body,
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    let detail = text;
+    try {
+      const j = JSON.parse(text) as { message?: string };
+      if (j.message) detail = j.message;
+    } catch {
+      /* raw text */
+    }
+    throw new Error(`업로드 실패 (${res.status}): ${detail}`);
+  }
+  return res.json() as Promise<{ imageUrl: string; key: string }>;
+}
+
 export async function toggleSoldOut(id: string, isSoldOut: boolean): Promise<Menu> {
   return updateMenu(id, { isSoldOut });
 }

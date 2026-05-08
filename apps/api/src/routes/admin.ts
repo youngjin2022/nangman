@@ -1,12 +1,71 @@
 // 관리자 라우트 - 메뉴/카테고리/테이블 CRUD + 매출 집계
 import { Router } from 'express';
+import multer from 'multer';
 import { randomBytes } from 'node:crypto';
 import type { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma';
 import { emitMenuUpdated } from '../lib/socket';
+import {
+  isS3MenuUploadConfigured,
+  uploadMenuImageToS3,
+} from '../lib/s3-menu-image';
 
-const router = Router();
+const router: Router = Router();
 const STORE_ID = process.env.DEFAULT_STORE_ID ?? 'store-001';
+
+const menuImageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter(_req, file, cb) {
+    const ok = /^image\/(jpeg|png|webp|gif)$/i.test(file.mimetype);
+    if (ok) cb(null, true);
+    else cb(new Error('이미지는 JPEG, PNG, WebP, GIF만 가능합니다 (최대 5MB).'));
+  },
+});
+
+router.post(
+  '/uploads/menu-image',
+  (req, res, next) => {
+    menuImageUpload.single('image')(req, res, (err: unknown) => {
+      if (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        res.status(400).json({ error: 'upload_invalid', message: msg });
+        return;
+      }
+      next();
+    });
+  },
+  async (req, res) => {
+    if (!isS3MenuUploadConfigured()) {
+      return res.status(503).json({
+        error: 's3_not_configured',
+        message:
+          '객체 스토리지 업로드: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_BUCKET(또는 S3_BUCKET_NAME) 필수. AWS S3면 AWS_REGION. Cloudflare R2면 R2_ENDPOINT(https://<계정ID>.r2.cloudflarestorage.com)와 손님 화면용 S3_PUBLIC_BASE_URL(커스텀 도메인 또는 R2 공개 URL) 필수.',
+      });
+    }
+    try {
+      const file = req.file;
+      if (!file?.buffer) {
+        return res.status(400).json({
+          error: 'missing_file',
+          message: 'multipart 형식으로 image 필드에 파일을 보내 주세요.',
+        });
+      }
+      const out = await uploadMenuImageToS3({
+        storeId: STORE_ID,
+        buffer: file.buffer,
+        contentType: file.mimetype,
+      });
+      res.status(201).json({ imageUrl: out.imageUrl, key: out.key });
+    } catch (e) {
+      console.error('[admin] POST /uploads/menu-image', e);
+      res.status(500).json({
+        error: 'upload_failed',
+        message: e instanceof Error ? e.message : String(e),
+      });
+    }
+  },
+);
 
 // ===== Categories =====
 router.get('/categories', async (_req, res) => {
