@@ -1,5 +1,5 @@
 // 메뉴 추가/수정 모달
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Modal } from "@/components/Modal";
 import {
   FormField,
@@ -37,6 +37,7 @@ export function MenuFormModal({
   const [imageRemoved, setImageRemoved] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -52,6 +53,7 @@ export function MenuFormModal({
       return null;
     });
     setError(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   }, [open, initial, categories]);
 
   useEffect(() => {
@@ -69,9 +71,17 @@ export function MenuFormModal({
     filePreviewUrl ??
     (!imageRemoved && existingImageUrl ? existingImageUrl : undefined);
 
+  let fileStatusText = "선택된 파일이 없습니다";
+  if (imageFile) fileStatusText = imageFile.name;
+  else if (initial && imageRemoved)
+    fileStatusText = "사진을 제거했습니다 · 저장하면 기본 아이콘으로 표시됩니다";
+  else if (initial && existingImageUrl && !imageRemoved)
+    fileStatusText = "등록된 사진이 있습니다 · 아래에서 새 파일로 바꿀 수 있습니다";
+
   const clearImage = () => {
     setImageFile(null);
     setImageRemoved(true);
+    if (fileInputRef.current) fileInputRef.current.value = "";
     setFilePreviewUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
       return null;
@@ -224,31 +234,53 @@ export function MenuFormModal({
           hint="파일을 업로드하면 서버에 저장하고 DB에는 공개 URL만 기록합니다. 비우면 손님 화면에서 기본 아이콘만 표시됩니다."
         >
           <input
+            ref={fileInputRef}
             type="file"
             accept="image/jpeg,image/png,image/webp,image/gif"
+            className="sr-only"
             onChange={onPickFile}
-            className={
-              inputClass +
-              " py-2 file:mr-3 file:rounded-lg file:border file:border-line file:bg-bg-subtle file:px-3 file:py-2 file:text-sm file:font-medium"
-            }
           />
-
-          {previewHref && (
-            <div className="mt-2 flex items-start gap-3">
-              <img
-                src={previewHref}
-                alt="미리보기"
-                className="w-20 h-20 rounded-xl object-cover border border-line shrink-0 bg-bg-subtle"
-              />
-              <button
-                type="button"
-                onClick={clearImage}
-                className="text-sm text-bad font-medium hover:underline"
-              >
-                사진 제거
-              </button>
+          <div className="rounded-lg border border-line bg-bg-panel shadow-sm overflow-hidden focus-within:ring-2 focus-within:ring-accent/25 focus-within:border-accent transition-colors">
+            <div className="flex flex-col gap-3 p-3 sm:flex-row sm:items-stretch sm:gap-4">
+              {previewHref && (
+                <div className="sm:w-[5.25rem] shrink-0">
+                  <div className="relative aspect-square w-full max-w-[5.25rem] overflow-hidden rounded-lg border border-line bg-bg-subtle">
+                    <img
+                      src={previewHref}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                </div>
+              )}
+              <div className="flex min-w-0 flex-1 flex-col justify-center gap-2">
+                <p className="text-sm leading-snug text-ink break-all">
+                  {fileStatusText}
+                </p>
+                <p className="text-xs text-ink-muted">
+                  JPEG · PNG · WebP · GIF, 최대 5MB
+                </p>
+                <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="inline-flex h-10 shrink-0 items-center justify-center rounded-lg bg-accent px-4 text-sm font-semibold text-white shadow-sm hover:bg-accent-dark active:opacity-95"
+                  >
+                    {imageFile ? "다른 파일 선택" : "파일 선택"}
+                  </button>
+                  {previewHref && (
+                    <button
+                      type="button"
+                      onClick={clearImage}
+                      className="inline-flex h-10 items-center justify-center rounded-lg border border-line bg-bg-subtle px-3 text-sm font-medium text-ink-muted hover:bg-line hover:text-ink"
+                    >
+                      사진 제거
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
-          )}
+          </div>
         </FormField>
 
         <FormField label="품절 여부">
