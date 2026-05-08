@@ -9,7 +9,6 @@ import {
 } from "@/components/FormField";
 import type { Category, Menu } from "@/lib/types";
 import { uploadMenuImage } from "@/lib/api";
-import { parseMenuImageUrl } from "@/lib/utils";
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
@@ -33,9 +32,9 @@ export function MenuFormModal({
   const [price, setPrice] = useState<number>(0);
   const [categoryId, setCategoryId] = useState("");
   const [isSoldOut, setIsSoldOut] = useState(false);
-  const [imageUrlRaw, setImageUrlRaw] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null);
+  const [imageRemoved, setImageRemoved] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,8 +45,8 @@ export function MenuFormModal({
     setPrice(initial?.price ?? 0);
     setCategoryId(initial?.categoryId ?? categories[0]?.id ?? "");
     setIsSoldOut(initial?.isSoldOut ?? false);
-    setImageUrlRaw(initial?.imageUrl ?? "");
     setImageFile(null);
+    setImageRemoved(false);
     setFilePreviewUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
       return null;
@@ -61,16 +60,22 @@ export function MenuFormModal({
     };
   }, [filePreviewUrl]);
 
+  const existingImageUrl =
+    initial?.imageUrl && String(initial.imageUrl).trim()
+      ? String(initial.imageUrl).trim()
+      : undefined;
+
   const previewHref =
-    filePreviewUrl ?? parseMenuImageUrl(imageUrlRaw.trim()) ?? undefined;
+    filePreviewUrl ??
+    (!imageRemoved && existingImageUrl ? existingImageUrl : undefined);
 
   const clearImage = () => {
     setImageFile(null);
+    setImageRemoved(true);
     setFilePreviewUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
       return null;
     });
-    setImageUrlRaw("");
   };
 
   const onPickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,8 +91,8 @@ export function MenuFormModal({
       return;
     }
     setError(null);
+    setImageRemoved(false);
     setImageFile(f);
-    setImageUrlRaw("");
     setFilePreviewUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
       return URL.createObjectURL(f);
@@ -101,7 +106,7 @@ export function MenuFormModal({
     if (!categoryId) return setError("카테고리를 선택해 주세요");
     if (price < 0) return setError("가격은 0원 이상이어야 합니다");
 
-    let resolvedUrl: string | undefined;
+    let imageUrl: string | null | undefined = undefined;
 
     setSubmitting(true);
     try {
@@ -110,17 +115,10 @@ export function MenuFormModal({
           setError("이미지는 최대 5MB까지 업로드할 수 있습니다.");
           return;
         }
-        const { imageUrl } = await uploadMenuImage(imageFile);
-        resolvedUrl = imageUrl;
-      } else if (imageUrlRaw.trim()) {
-        const parsed = parseMenuImageUrl(imageUrlRaw.trim());
-        if (parsed === undefined) {
-          setError(
-            "사진 URL은 http:// 또는 https:// 로 시작하는 주소만 사용할 수 있습니다",
-          );
-          return;
-        }
-        resolvedUrl = parsed;
+        const { imageUrl: url } = await uploadMenuImage(imageFile);
+        imageUrl = url;
+      } else if (initial && imageRemoved) {
+        imageUrl = null;
       }
 
       const payload: Omit<Menu, "id"> = {
@@ -130,10 +128,8 @@ export function MenuFormModal({
         price,
         isSoldOut,
       };
-      if (initial) {
-        payload.imageUrl = resolvedUrl ?? null;
-      } else if (resolvedUrl !== undefined) {
-        payload.imageUrl = resolvedUrl;
+      if (imageUrl !== undefined) {
+        payload.imageUrl = imageUrl;
       }
       await onSubmit(payload);
       onClose();
@@ -225,7 +221,7 @@ export function MenuFormModal({
 
         <FormField
           label="사진"
-          hint="파일을 선택하면 서버가 S3에 저장하고 DB에는 공개 URL만 기록합니다. 대신 외부 https 이미지 URL만 넣어도 됩니다. 비우면 손님 화면에서 기본 아이콘만 표시됩니다."
+          hint="파일을 업로드하면 서버에 저장하고 DB에는 공개 URL만 기록합니다. 비우면 손님 화면에서 기본 아이콘만 표시됩니다."
         >
           <input
             type="file"
@@ -235,17 +231,6 @@ export function MenuFormModal({
               inputClass +
               " py-2 file:mr-3 file:rounded-lg file:border file:border-line file:bg-bg-subtle file:px-3 file:py-2 file:text-sm file:font-medium"
             }
-          />
-
-          <p className="mt-2 text-xs text-ink-muted">또는 URL (선택)</p>
-          <input
-            value={imageUrlRaw}
-            disabled={Boolean(imageFile)}
-            onChange={(e) => setImageUrlRaw(e.target.value)}
-            className={inputClass + (imageFile ? " opacity-60 cursor-not-allowed" : "")}
-            placeholder="https://…"
-            inputMode="url"
-            autoComplete="off"
           />
 
           {previewHref && (
