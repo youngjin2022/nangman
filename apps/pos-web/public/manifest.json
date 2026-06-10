@@ -1,0 +1,22 @@
+{
+  "name": "낭만포차 POS",
+  "short_name": "낭만포차 POS",
+  "description": "낭만포차 홀 직원용 주문/결제 관리 POS",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F4F5F7",
+  "theme_color": "#FFFFFF",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
