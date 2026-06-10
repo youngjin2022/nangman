@@ -77,8 +77,9 @@ export async function uploadMenuImage(file: File): Promise<{ imageUrl: string; k
     const text = await res.text().catch(() => '');
     let detail = text;
     try {
-      const j = JSON.parse(text) as { message?: string };
+      const j = JSON.parse(text) as { message?: string; missing?: string[] };
       if (j.message) detail = j.message;
+      if (j.missing?.length) detail += ` (누락: ${j.missing.join(', ')})`;
     } catch {
       /* raw text */
     }

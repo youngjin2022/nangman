@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import { ActivityWatcher } from '@/components/ActivityWatcher';
 
 export const metadata: Metadata = {
   title: '낭만포차 모바일 주문',
@@ -24,7 +25,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko">
-      <body className="min-h-screen">{children}</body>
+      <body className="min-h-screen">
+        <ActivityWatcher />
+        {children}
+      </body>
     </html>
   );
 }

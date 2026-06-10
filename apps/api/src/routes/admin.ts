@@ -6,6 +6,7 @@ import type { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma';
 import { emitMenuUpdated } from '../lib/socket';
 import {
+  getMenuUploadConfigGaps,
   isS3MenuUploadConfigured,
   uploadMenuImageToS3,
 } from '../lib/s3-menu-image';
@@ -37,10 +38,12 @@ router.post(
   },
   async (req, res) => {
     if (!isS3MenuUploadConfigured()) {
+      const missing = getMenuUploadConfigGaps();
       return res.status(503).json({
         error: 's3_not_configured',
+        missing,
         message:
-          '객체 스토리지 업로드: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_BUCKET(또는 S3_BUCKET_NAME) 필수. AWS S3면 AWS_REGION. Cloudflare R2면 R2_ENDPOINT(https://<계정ID>.r2.cloudflarestorage.com)와 손님 화면용 S3_PUBLIC_BASE_URL(커스텀 도메인 또는 R2 공개 URL) 필수.',
+          '객체 스토리지 설정이 완료되지 않았습니다. `missing`에 나온 변수를 API가 돌아가는 Railway 서비스에 넣고 재배포하세요. Cloudflare R2는 보통 AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_BUCKET, R2_ENDPOINT, S3_PUBLIC_BASE_URL 다섯 가지가 필요합니다.',
       });
     }
     try {

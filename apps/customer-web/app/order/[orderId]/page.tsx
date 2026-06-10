@@ -3,10 +3,13 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { useSessionStore } from '@/lib/store/sessionStore';
 import { formatKRW } from '@/lib/utils';
+
+// 주문 완료 후 자동으로 메뉴 홈(/t/[tableToken])으로 복귀하기까지 대기 시간(초)
+const AUTO_RETURN_SECONDS = 5;
 
 interface StoredOrder {
   orderNumber: string;
@@ -23,14 +26,29 @@ interface StoredOrder {
 
 export default function OrderDonePage() {
   const params = useParams<{ orderId: string }>();
+  const router = useRouter();
   const session = useSessionStore((s) => s.session);
   const [order, setOrder] = useState<StoredOrder | null>(null);
+  const [secondsLeft, setSecondsLeft] = useState(AUTO_RETURN_SECONDS);
+
+  // tableToken 유지: 세션의 qrToken으로 메뉴 홈(/t/[tableToken])으로 복귀
+  const homeHref = session ? `/t/${session.qrToken}` : '/';
 
   // 장바구니 페이지에서 sessionStorage에 저장한 주문 데이터 복원
   useEffect(() => {
     const raw = sessionStorage.getItem(`order-${params.orderId}`);
     if (raw) setOrder(JSON.parse(raw));
   }, [params.orderId]);
+
+  // 카운트다운 후 자동 복귀
+  useEffect(() => {
+    if (secondsLeft <= 0) {
+      router.replace(homeHref);
+      return;
+    }
+    const timer = setTimeout(() => setSecondsLeft((s) => s - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [secondsLeft, router, homeHref]);
 
   return (
     <main className="min-h-screen pb-32">
@@ -115,13 +133,25 @@ export default function OrderDonePage() {
         </>
       )}
 
-      <div className="safe-bottom fixed bottom-0 left-0 right-0 z-40 px-4 pb-3 pt-3 bg-bg/95 backdrop-blur border-t border-line">
-        <Link
-          href="/menu"
-          className="flex items-center justify-center w-full h-14 rounded-2xl bg-accent text-black font-semibold active:opacity-80 transition"
-        >
-          메뉴 추가 주문하기
-        </Link>
+      <div className="safe-bottom fixed bottom-0 left-0 right-0 z-40 px-4 pb-3 pt-3 bg-bg/95 backdrop-blur border-t border-line space-y-2">
+        <p className="text-center text-xs text-muted">
+          {secondsLeft}초 후 처음 화면으로 돌아갑니다
+        </p>
+        <div className="grid grid-cols-2 gap-2">
+          <Link
+            href="/menu"
+            className="flex items-center justify-center w-full h-14 rounded-2xl bg-accent text-black font-semibold active:opacity-80 transition"
+          >
+            메뉴 추가 주문하기
+          </Link>
+          <button
+            type="button"
+            onClick={() => router.replace(homeHref)}
+            className="flex items-center justify-center w-full h-14 rounded-2xl bg-bg-elevated text-white font-semibold active:opacity-80 transition"
+          >
+            지금 돌아가기
+          </button>
+        </div>
       </div>
     </main>
   );

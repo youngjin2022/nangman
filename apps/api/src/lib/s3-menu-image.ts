@@ -38,11 +38,22 @@ function getAwsRegion(): string {
 
 /** S3_BUCKET 우선, 없으면 S3_BUCKET_NAME */
 function getBucket(): string {
-  return process.env.S3_BUCKET ?? process.env.S3_BUCKET_NAME ?? '';
+  const raw = process.env.S3_BUCKET ?? process.env.S3_BUCKET_NAME ?? '';
+  return raw.trim();
 }
 
 function getPublicBaseUrl(): string {
   return process.env.S3_PUBLIC_BASE_URL?.trim().replace(/\/$/, '') ?? '';
+}
+
+/** 503 진단용 · Railway에 무엇을 더 넣어야 할지 (값은 노출하지 않음) */
+export function getMenuUploadConfigGaps(): string[] {
+  const gaps: string[] = [];
+  if (!process.env.AWS_ACCESS_KEY_ID?.trim()) gaps.push('AWS_ACCESS_KEY_ID');
+  if (!process.env.AWS_SECRET_ACCESS_KEY?.trim()) gaps.push('AWS_SECRET_ACCESS_KEY');
+  if (!getBucket()) gaps.push('S3_BUCKET 또는 S3_BUCKET_NAME');
+  if (usesCustomEndpoint() && !getPublicBaseUrl()) gaps.push('S3_PUBLIC_BASE_URL');
+  return gaps;
 }
 
 /**
@@ -50,12 +61,7 @@ function getPublicBaseUrl(): string {
  * 브라우저용 imageUrl을 안정적으로 만들 수 없음.
  */
 export function isS3MenuUploadConfigured(): boolean {
-  const hasCreds = Boolean(
-    process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY && getBucket(),
-  );
-  if (!hasCreds) return false;
-  if (usesCustomEndpoint() && !getPublicBaseUrl()) return false;
-  return true;
+  return getMenuUploadConfigGaps().length === 0;
 }
 
 export function getS3Client(): S3Client {
